@@ -4,6 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from fastapi import HTTPException
+import bcrypt
 import logging
 logger = logging.getLogger(__name__)
 
@@ -38,14 +39,19 @@ class ClienteMySQLRepository(ClientePort):
             logger.error(f"[ClienteMySQLRepository] Error inesperado al obtener cliente con ID {cliente_id}: {e}")
             raise HTTPException(status_code=500, detail=f"Error interno al obtener cliente con ID {cliente_id}: {e}")
 
+
+
     def create(self, cliente: Cliente):
         if cliente is None:
             logger.warning("[ClienteMySQLRepository] cliente es None.")
             raise HTTPException(status_code=400, detail="Datos del cliente requeridos.")
 
+        if cliente.contrasena_hash:
+            cliente.contrasena_hash = bcrypt.hashpw(cliente.contrasena_hash.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
         query = text("""
-            INSERT INTO Cliente (nombre, email, telefono, cedula, direccion)
-            VALUES (:nombre, :email, :telefono, :cedula, :direccion)
+            INSERT INTO Cliente (nombre, email, telefono, cedula, direccion, contrasena_hash)
+            VALUES (:nombre, :email, :telefono, :cedula, :direccion, :contrasena_hash)
         """)
         try:
             self.db.execute(query, cliente.__dict__)

@@ -31,7 +31,7 @@ class ClienteService:
             logger.error(f"[ClienteService] Error inesperado al obtener cliente con ID {client_id}: {e}")
             raise HTTPException(status_code=500, detail=f"Error interno al obtener cliente con ID {client_id}: {e}")
 
-            return None
+
 
     def create_client(self, client: Cliente) -> Cliente:
         try:

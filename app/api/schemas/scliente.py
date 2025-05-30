@@ -14,8 +14,9 @@ class ClienteCreateUpdateSchema(BaseModel):
     telefono: str
     cedula: str
     direccion: str
+    contrasena_hash: str
 
-    @field_validator('nombre', 'telefono', 'cedula', 'direccion')
+    @field_validator('nombre', 'telefono', 'cedula', 'direccion', 'contrasena_hash')
     @classmethod
     def validate_non_empty(cls, v, info):
         if not v or not v.strip():

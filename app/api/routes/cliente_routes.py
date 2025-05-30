@@ -42,6 +42,7 @@ def get_client(cliente_id: int, service: ClienteService = Depends(get_cliente_se
         logger.error(f"[get_client] Error inesperado al obtener cliente con ID {cliente_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Error interno al obtener cliente con ID {cliente_id}: {e}")
 
+
 @router.post("/clientes", response_model=ClienteSchema)
 def create_client(cliente_data: ClienteCreateUpdateSchema, service: ClienteService = Depends(get_cliente_service)):
     try:
@@ -51,7 +52,8 @@ def create_client(cliente_data: ClienteCreateUpdateSchema, service: ClienteServi
             email=cliente_data.email,
             telefono=cliente_data.telefono,
             cedula=cliente_data.cedula,
-            direccion=cliente_data.direccion
+            direccion=cliente_data.direccion,
+            contrasena_hash=cliente_data.contrasena_hash
         )
         nuevo_cliente = service.create_client(cliente)
         return nuevo_cliente

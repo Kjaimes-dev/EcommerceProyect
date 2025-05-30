@@ -1,3 +1,4 @@
+import bcrypt
 from dataclasses import dataclass
 
 @dataclass
@@ -8,6 +9,7 @@ class Cliente:
     telefono: str
     cedula: str
     direccion: str
+    contrasena_hash: str
 
     def __post_init__(self):
         if self.id_cliente is None or not isinstance(self.id_cliente, int):
@@ -22,3 +24,13 @@ class Cliente:
             print(f"[Cliente] Advertencia: cedula inválida: {self.cedula}")
         if not self.direccion or not isinstance(self.direccion, str):
             print(f"[Cliente] Advertencia: direccion inválida: {self.direccion}")
+        if not self.contrasena_hash or not isinstance(self.contrasena_hash, str):
+            print(f"[Cliente] Advertencia: contrasena_hash inválida: {self.contrasena_hash}")
+        else:
+            self.contrasena_hash = self.hash_password(self.contrasena_hash)
+
+    @staticmethod
+    def hash_password(password: str) -> str:
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+        return hashed.decode('utf-8')
