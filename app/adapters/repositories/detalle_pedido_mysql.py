@@ -3,6 +3,9 @@ from app.domain.models.detalle_pedido import DetallePedido
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
+import logging
+logger = logging.getLogger(__name__)
 
 class DetallePedidoMySQLRepository(DetallePedidoPort):
     def __init__(self, db: Session):
@@ -28,7 +31,6 @@ class DetallePedidoMySQLRepository(DetallePedidoPort):
             raise HTTPException(status_code=500, detail=f"Error al obtener detalle de pedido: {e}")
 
     def crear(self, detalle_pedido: DetallePedido) -> DetallePedido:
-        # Verificar si el id_pedido existe en la tabla Pedido
         pedido_existente = self.db.execute(
             text("SELECT id_pedido FROM Pedido WHERE id_pedido = :id_pedido"),
             {"id_pedido": detalle_pedido.id_pedido}
@@ -36,6 +38,14 @@ class DetallePedidoMySQLRepository(DetallePedidoPort):
 
         if not pedido_existente:
             raise HTTPException(status_code=400, detail=f"El id_pedido {detalle_pedido.id_pedido} no existe en la tabla Pedido.")
+
+        producto_existente = self.db.execute(
+            text("SELECT id_producto FROM Producto WHERE id_producto = :id_producto"),
+            {"id_producto": detalle_pedido.id_producto}
+        ).fetchone()
+
+        if not producto_existente:
+            raise HTTPException(status_code=400, detail=f"El id_producto {detalle_pedido.id_producto} no existe en la tabla Producto.")
 
         query = text("""
             INSERT INTO DetallePedido (id_pedido, id_producto, cantidad, precio_unitario)
@@ -50,6 +60,11 @@ class DetallePedidoMySQLRepository(DetallePedidoPort):
                 {"id": last_id}
             ).fetchone()
             return DetallePedido(**dict(result._mapping))
+        except IntegrityError as e:
+            self.db.rollback()
+            logger.error(f"[DetallePedidoMySQLRepository] Error de integridad al crear detalle de pedido: {e}")
+            raise HTTPException(status_code=400, detail="Violación de clave foránea: asegúrate de que id_pedido e id_producto existan.")
         except Exception as e:
             self.db.rollback()
-            raise HTTPException(status_code=500, detail=f"Error al crear detalle de pedido: {e}")
+            logger.error(f"[DetallePedidoMySQLRepository] Error inesperado al crear detalle de pedido: {e}")
+            raise HTTPException(status_code=500, detail="Error interno al crear detalle de pedido.")

@@ -26,7 +26,7 @@ class ClienteService:
                 raise HTTPException(status_code=404, detail=f"Cliente con ID {client_id} no encontrado.")
             return cliente
         except HTTPException as e:
-            raise e  # Propagar el mensaje específico
+            raise e
         except Exception as e:
             logger.error(f"[ClienteService] Error inesperado al obtener cliente con ID {client_id}: {e}")
             raise HTTPException(status_code=500, detail=f"Error interno al obtener cliente con ID {client_id}: {e}")
@@ -40,7 +40,7 @@ class ClienteService:
                 raise HTTPException(status_code=400, detail="Datos del cliente no válidos.")
             return self.repository.create(client)
         except HTTPException as e:
-            raise e  # Propagar el mensaje específico
+            raise e
         except Exception as e:
             logger.error(f"[ClienteService] Error inesperado al crear cliente: {e}")
             raise HTTPException(status_code=500, detail=f"Error interno al crear cliente: {e}")

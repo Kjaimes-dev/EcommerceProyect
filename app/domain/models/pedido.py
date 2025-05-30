@@ -27,7 +27,7 @@ class Pedido:
                 logger.warning(f"[Pedido] id_cliente inválido: {self.id_cliente}")
             if not isinstance(self.fecha, datetime):
                 logger.warning(f"[Pedido] fecha inválida: {self.fecha}")
-            if isinstance(self.estado, str):  # Convertir cadena a EstadoPedido
+            if isinstance(self.estado, str):
                 self.estado = EstadoPedido(self.estado)
             if not isinstance(self.estado, EstadoPedido):
                 logger.warning(f"[Pedido] estado inválido: {self.estado}")
